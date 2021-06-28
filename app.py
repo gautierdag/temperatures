@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import altair as alt
+import numpy as np
 
 
 @st.cache
@@ -206,7 +207,6 @@ else:
         mean_df.location_date <= to_date_ts
     )
     agg_data = mean_df.loc[mask_agg]
-
     line_agg = (
         alt.Chart(agg_data)
         .mark_line(opacity=0.7)
@@ -249,5 +249,156 @@ else:
     st.write(
         "Overlay your cursor to get specific temperature information for a given month/year."
     )
+
+# Season based
+seasons = st.multiselect(
+    "Filter on specific seasons",
+    [
+        "Winter",
+        "Summer",
+        "Autumn",
+        "Spring",
+    ],
+    [],
+)
+if not seasons:
+    seasons = ["Winter", "Spring", "Summer", "Autumn"]
+
+daily_weighted_data[
+    "season_name"
+] = daily_weighted_data.location_date.dt.month_name().map(
+    {
+        "December": "Winter",
+        "January": "Winter",
+        "February": "Winter",
+        "March": "Spring",
+        "April": "Spring",
+        "May": "Spring",
+        "June": "Summer",
+        "July": "Summer",
+        "August": "Summer",
+        "September": "Autumn",
+        "October": "Autumn",
+        "November": "Autumn",
+    }
+)
+daily_weighted_data["year"] = daily_weighted_data["location_date"].apply(
+    lambda x: x.year
+)
+daily_weighted_data["month"] = daily_weighted_data["location_date"].apply(
+    lambda x: x.month
+)
+daily_weighted_data["month"] = np.where(
+    daily_weighted_data["month"] == 12, 0, daily_weighted_data["month"]
+)
+daily_weighted_data["season"] = daily_weighted_data["month"] // 3
+daily_weighted_data["name_year_cumulative"] = (
+    daily_weighted_data["year"] - daily_weighted_data["year"].min()
+)
+daily_weighted_data["cumulative_season"] = np.where(
+    daily_weighted_data["month"] == 0,
+    daily_weighted_data["season"]
+    + (daily_weighted_data["name_year_cumulative"] + 1) * 4,
+    daily_weighted_data["season"] + daily_weighted_data["name_year_cumulative"] * 4,
+)
+season_weighted_data = (
+    daily_weighted_data.groupby("cumulative_season")
+    .agg(
+        {
+            "weighted_mean_temp": "mean",
+            "weighted_min_temp": "mean",
+            "weighted_max_temp": "mean",
+            "season_name": "first",
+            "year": "first",
+        }
+    )
+    .reset_index()
+)
+season_weighted_data = season_weighted_data[
+    season_weighted_data.season_name.isin(seasons)
+]
+season_weighted_data["season_name_yr"] = (
+    season_weighted_data["season_name"] + " " + season_weighted_data["year"].apply(str)
+)
+if len(seasons) < 4:
+    line_agg = (
+        alt.Chart(season_weighted_data)
+        .mark_line(opacity=0.7)
+        .encode(
+            x=alt.X("cumulative_season:T", title="Date"),
+            y=alt.Y(
+                "weighted_mean_temp:Q",
+                title="Weighted Mean Temperature (Pop * Celsius))",
+                scale=alt.Scale(zero=False),
+            ),
+            tooltip=[
+                "season_name_yr",
+                "weighted_mean_temp:N",
+                "weighted_min_temp:N",
+                "weighted_max_temp:N",
+            ],
+            color="season_name",
+        )
+    )
+    band_agg = (
+        alt.Chart(season_weighted_data)
+        .mark_area(opacity=0.3)
+        .encode(
+            x=alt.X("cumulative_season:T", title="Date"),
+            y="weighted_min_temp:Q",
+            y2="weighted_max_temp:Q",
+            tooltip=[
+                "season_name_yr",
+                "weighted_mean_temp:N",
+                "weighted_min_temp:N",
+                "weighted_max_temp:N",
+            ],
+            color="season_name",
+        )
+    )
+else:
+    line_agg = (
+        alt.Chart(season_weighted_data)
+        .mark_line(opacity=0.7)
+        .encode(
+            x=alt.X("cumulative_season:T", title="Date"),
+            y=alt.Y(
+                "weighted_mean_temp:Q",
+                title="Weighted Mean Temperature (Pop * Celsius))",
+                scale=alt.Scale(zero=False),
+            ),
+            tooltip=[
+                "season_name_yr",
+                "weighted_mean_temp:N",
+                "weighted_min_temp:N",
+                "weighted_max_temp:N",
+            ],
+        )
+    )
+    band_agg = (
+        alt.Chart(season_weighted_data)
+        .mark_area(opacity=0.3)
+        .encode(
+            x=alt.X("cumulative_season:T", title="Date"),
+            y="weighted_min_temp:Q",
+            y2="weighted_max_temp:Q",
+            tooltip=[
+                "season_name_yr",
+                "weighted_mean_temp:N",
+                "weighted_min_temp:N",
+                "weighted_max_temp:N",
+            ],
+        )
+    )
+
+lb_agg = alt.layer(line_agg, band_agg)
+
+lb_agg.title = "Population Weighted Seasonal Temperatures"
+
+st.altair_chart(lb_agg, use_container_width=True)
+
+st.write(
+    "Overlay your cursor to get specific temperature information for a given season/year."
+)
 
 st.button("Re-run")
