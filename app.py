@@ -3,6 +3,9 @@ import pandas as pd
 import altair as alt
 import numpy as np
 
+pd.set_option("display.precision", 2)
+pd.set_option("display.precision", 2)
+
 
 @st.cache
 def get_processed_temp_data():
@@ -60,6 +63,11 @@ else:
                 x=alt.X("location_date:T", title="Date"),
                 y=alt.Y("temp_mean_c:Q", title="Temperature (Celcius)"),
                 color="name",
+                tooltip=[
+                    alt.Tooltip("weighted_mean_temp:Q", format=".2f"),
+                    alt.Tooltip("weighted_min_temp:Q", format=".2f"),
+                    alt.Tooltip("weighted_max_temp:Q", format=".2f"),
+                ],
             )
         )
         band = (
@@ -70,6 +78,11 @@ else:
                 y="temp_min_c:Q",
                 y2="temp_max_c:Q",
                 color="name",
+                tooltip=[
+                    alt.Tooltip("weighted_mean_temp:Q", format=".2f"),
+                    alt.Tooltip("weighted_min_temp:Q", format=".2f"),
+                    alt.Tooltip("weighted_max_temp:Q", format=".2f"),
+                ],
             )
         )
     else:
@@ -79,6 +92,11 @@ else:
             .encode(
                 x=alt.X("location_date:T", title="Date"),
                 y=alt.Y("mean(temp_mean_c):Q", title="Temperature (Celcius)"),
+                tooltip=[
+                    alt.Tooltip("weighted_mean_temp:Q", format=".2f"),
+                    alt.Tooltip("weighted_min_temp:Q", format=".2f"),
+                    alt.Tooltip("weighted_max_temp:Q", format=".2f"),
+                ],
             )
         )
         band = (
@@ -88,6 +106,11 @@ else:
                 x=alt.X("location_date:T", title="Date"),
                 y="mean(temp_min_c):Q",
                 y2="mean(temp_max_c):Q",
+                tooltip=[
+                    alt.Tooltip("weighted_mean_temp:Q", format=".2f"),
+                    alt.Tooltip("weighted_min_temp:Q", format=".2f"),
+                    alt.Tooltip("weighted_max_temp:Q", format=".2f"),
+                ],
             )
         )
 
@@ -138,7 +161,11 @@ line = (
         y=alt.Y(
             "weighted_mean_temp:Q", title="Weighted Average Temperatures (Celcius)"
         ),
-        tooltip=["weighted_mean_temp:Q"],
+        tooltip=[
+            alt.Tooltip("weighted_mean_temp:Q", format=".2f"),
+            alt.Tooltip("weighted_min_temp:Q", format=".2f"),
+            alt.Tooltip("weighted_max_temp:Q", format=".2f"),
+        ],
     )
 )
 band = (
@@ -148,7 +175,11 @@ band = (
         x=alt.X("location_date:T", title="Date"),
         y="weighted_min_temp:Q",
         y2="weighted_max_temp:Q",
-        tooltip=["weighted_mean_temp:Q"],
+        tooltip=[
+            alt.Tooltip("weighted_mean_temp:Q", format=".2f"),
+            alt.Tooltip("weighted_min_temp:Q", format=".2f"),
+            alt.Tooltip("weighted_max_temp:Q", format=".2f"),
+        ],
     )
 )
 lb = alt.layer(line, band)
@@ -333,9 +364,9 @@ if len(seasons) < 4:
             ),
             tooltip=[
                 "season_name_yr",
-                "weighted_mean_temp:N",
-                "weighted_min_temp:N",
-                "weighted_max_temp:N",
+                alt.Tooltip("weighted_mean_temp:Q", format=".2f"),
+                alt.Tooltip("weighted_min_temp:Q", format=".2f"),
+                alt.Tooltip("weighted_max_temp:Q", format=".2f"),
             ],
             color="season_name",
         )
@@ -349,9 +380,9 @@ if len(seasons) < 4:
             y2="weighted_max_temp:Q",
             tooltip=[
                 "season_name_yr",
-                "weighted_mean_temp:N",
-                "weighted_min_temp:N",
-                "weighted_max_temp:N",
+                alt.Tooltip("weighted_mean_temp:Q", format=".2f"),
+                alt.Tooltip("weighted_min_temp:Q", format=".2f"),
+                alt.Tooltip("weighted_max_temp:Q", format=".2f"),
             ],
             color="season_name",
         )
@@ -369,9 +400,9 @@ else:
             ),
             tooltip=[
                 "season_name_yr",
-                "weighted_mean_temp:N",
-                "weighted_min_temp:N",
-                "weighted_max_temp:N",
+                alt.Tooltip("weighted_mean_temp:Q", format=".2f"),
+                alt.Tooltip("weighted_min_temp:Q", format=".2f"),
+                alt.Tooltip("weighted_max_temp:Q", format=".2f"),
             ],
         )
     )
@@ -384,9 +415,9 @@ else:
             y2="weighted_max_temp:Q",
             tooltip=[
                 "season_name_yr",
-                "weighted_mean_temp:N",
-                "weighted_min_temp:N",
-                "weighted_max_temp:N",
+                alt.Tooltip("weighted_mean_temp:Q", format=".2f"),
+                alt.Tooltip("weighted_min_temp:Q", format=".2f"),
+                alt.Tooltip("weighted_max_temp:Q", format=".2f"),
             ],
         )
     )
