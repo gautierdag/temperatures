@@ -6,7 +6,7 @@ What prompted this analysis was a tweet:
 
 ![prompt][prompt.jpg]
 
-All the code can be found in the jupyter notebook as well as a streamlit app running on heroku.
+All the code can be found in the jupyter notebook as well as a streamlit app running on heroku here: https://recorded-temperatures.herokuapp.com/ .
 
 For imputing missing data/days we use an average between the last recorded temperature and the next recorded temperature.
 
