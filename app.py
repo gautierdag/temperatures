@@ -165,7 +165,7 @@ chart = lb + ch
 chart.title = "Average Temperatures Recorded Weighted by Population"
 st.altair_chart(chart, use_container_width=True)
 st.write(
-    "Here we weight temperatures recorded by the population of the cities in which they are recorded, to obtain a single timeseries."
+    "Here we weight daily temperatures (min/max/mean) recorded by the population of the cities in which they are recorded, to obtain a single timeseries."
 )
 
 st.write("### Population data")
@@ -184,87 +184,70 @@ pop_chart = (
 st.altair_chart(pop_chart, use_container_width=True)
 
 
-# st.write("### Monthly and Seasonly Aggregates (weighted by population)")
+st.write(
+    "## Plotting Monthly Population Weighted Mean, Min and Max Temperatures",
+)
+mean_df = (
+    daily_weighted_data.groupby(pd.Grouper(key="location_date", freq="1M"))
+    .mean()
+    .reset_index()
+)
+mean_df["date_string"] = (
+    mean_df.location_date.dt.month_name()
+    + " "
+    + mean_df.location_date.dt.year.apply(str)
+)
 
-# cities_agg = st.multiselect(
-#     "Choose Cities", list(df.name.unique()), ["Portland", "New York"], key="Cities Agg"
-# )
-# from_date_agg = st.date_input(
-#     "From", df.location_date.min().date(), key="From Date Agg"
-# )
-# to_date_agg = st.date_input("To", df.location_date.max().date(), key="To Date Agg")
+if from_date > to_date:
+    st.error("Please from date less than the to date.")
+else:
 
-# all_series = []
+    mask_agg = (mean_df.location_date >= from_date_ts) & (
+        mean_df.location_date <= to_date_ts
+    )
+    agg_data = mean_df.loc[mask_agg]
 
-# for name in df["name"].unique():
+    line_agg = (
+        alt.Chart(agg_data)
+        .mark_line(opacity=0.7)
+        .encode(
+            x=alt.X("location_date:T", title="Date"),
+            y=alt.Y(
+                "weighted_mean_temp:Q",
+                title="Weighted Mean Temperature (Pop * Celsius))",
+            ),
+            tooltip=[
+                "date_string",
+                "weighted_mean_temp:N",
+                "weighted_min_temp:N",
+                "weighted_max_temp:N",
+            ],
+        )
+    )
+    band_agg = (
+        alt.Chart(agg_data)
+        .mark_area(opacity=0.3)
+        .encode(
+            x=alt.X("location_date:T", title="Date"),
+            y="weighted_min_temp:Q",
+            y2="weighted_max_temp:Q",
+            tooltip=[
+                "date_string",
+                "weighted_mean_temp:N",
+                "weighted_min_temp:N",
+                "weighted_max_temp:N",
+            ],
+        )
+    )
 
-#     mean_series = (
-#         df.loc[df["name"] == name]
-#         .groupby(pd.Grouper(key="location_date", freq="1M"))
-#         .apply(weighted_mean_function())
-#         .reset_index(name="weighted_mean_temp")
-#     )
-#     min_series = (
-#         df.groupby(pd.Grouper(key="location_date", freq="1M"))
-#         .apply(weighted_mean_function("temp_min_c"))
-#         .reset_index(name="weighted_min_temp")
-#     )
-#     max_series = (
-#         df.groupby(pd.Grouper(key="location_date", freq="1M"))
-#         .apply(weighted_mean_function("temp_max_c"))
-#         .reset_index(name="weighted_max_temp")
-#     )
-#     mean_series["weighted_min_temp"] = min_series["weighted_min_temp"]
-#     mean_series["weighted_max_temp"] = max_series["weighted_max_temp"]
-#     mean_series["name"] = name
+    lb_agg = alt.layer(line_agg, band_agg)
 
-#     all_series.append(mean_series)
+    lb_agg.title = "Population Weighted Monthly Temperatures"
 
-# mean_df = pd.concat(all_series)
+    st.altair_chart(lb_agg, use_container_width=True)
 
-# if not cities_agg:
-#     st.error("Please select at least one city.")
-# elif from_date_agg > to_date_agg:
-#     st.error("Please from date less than the to date.")
-# else:
-#     from_date_ts_agg = pd.Timestamp(from_date)
-#     to_date_ts_agg = pd.Timestamp(to_date)
+    st.write(
+        "Overlay your cursor to get specific temperature information for a given month/year."
+    )
 
-#     mask_agg = (
-#         (mean_df.location_date >= from_date_ts_agg)
-#         & (mean_df.name.isin(cities_agg))
-#         & (mean_df.location_date <= to_date_ts_agg)
-#     )
-#     agg_data = mean_df.loc[mask_agg]
-
-#     line_agg = (
-#         alt.Chart(agg_data)
-#         .mark_line(opacity=0.7)
-#         .encode(
-#             x=alt.X("location_date:T", title="Date"),
-#             y=alt.Y(
-#                 "weighted_mean_temp:Q",
-#                 title="Weighted Mean Temperature (Pop * Celsius))",
-#             ),
-#         )
-#     )
-#     band_agg = (
-#         alt.Chart(agg_data)
-#         .mark_area(opacity=0.3)
-#         .encode(
-#             x=alt.X("location_date:T", title="Date"),
-#             y="weighted_min_temp:Q",
-#             y2="weighted_max_temp:Q",
-#         )
-#     )
-
-#     lb_agg = alt.layer(line_agg, band_agg)
-
-#     lb_agg.title = "Average Temperatures Recorded"
-
-#     st.altair_chart(lb_agg, use_container_width=True)
-
-# Streamlit widgets automatically run the script from top to bottom. Since
-# this button is not connected to any other logic, it just causes a plain
-# rerun.
 st.button("Re-run")
