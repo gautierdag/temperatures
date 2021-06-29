@@ -64,9 +64,10 @@ else:
                 y=alt.Y("temp_mean_c:Q", title="Temperature (Celcius)"),
                 color="name",
                 tooltip=[
-                    alt.Tooltip("weighted_mean_temp:Q", format=".2f"),
-                    alt.Tooltip("weighted_min_temp:Q", format=".2f"),
-                    alt.Tooltip("weighted_max_temp:Q", format=".2f"),
+                    alt.Tooltip("location_date:T"),
+                    alt.Tooltip("temp_mean_c:Q", format=".2f"),
+                    alt.Tooltip("temp_min_c:Q", format=".2f"),
+                    alt.Tooltip("temp_max_c:Q", format=".2f"),
                 ],
             )
         )
@@ -79,9 +80,10 @@ else:
                 y2="temp_max_c:Q",
                 color="name",
                 tooltip=[
-                    alt.Tooltip("weighted_mean_temp:Q", format=".2f"),
-                    alt.Tooltip("weighted_min_temp:Q", format=".2f"),
-                    alt.Tooltip("weighted_max_temp:Q", format=".2f"),
+                    alt.Tooltip("location_date:T"),
+                    alt.Tooltip("temp_mean_c:Q", format=".2f"),
+                    alt.Tooltip("temp_min_c:Q", format=".2f"),
+                    alt.Tooltip("temp_max_c:Q", format=".2f"),
                 ],
             )
         )
@@ -93,9 +95,10 @@ else:
                 x=alt.X("location_date:T", title="Date"),
                 y=alt.Y("mean(temp_mean_c):Q", title="Temperature (Celcius)"),
                 tooltip=[
-                    alt.Tooltip("weighted_mean_temp:Q", format=".2f"),
-                    alt.Tooltip("weighted_min_temp:Q", format=".2f"),
-                    alt.Tooltip("weighted_max_temp:Q", format=".2f"),
+                    alt.Tooltip("location_date:T"),
+                    alt.Tooltip("temp_mean_c:Q", format=".2f"),
+                    alt.Tooltip("temp_min_c:Q", format=".2f"),
+                    alt.Tooltip("temp_max_c:Q", format=".2f"),
                 ],
             )
         )
@@ -107,9 +110,10 @@ else:
                 y="mean(temp_min_c):Q",
                 y2="mean(temp_max_c):Q",
                 tooltip=[
-                    alt.Tooltip("weighted_mean_temp:Q", format=".2f"),
-                    alt.Tooltip("weighted_min_temp:Q", format=".2f"),
-                    alt.Tooltip("weighted_max_temp:Q", format=".2f"),
+                    alt.Tooltip("location_date:T"),
+                    alt.Tooltip("temp_mean_c:Q", format=".2f"),
+                    alt.Tooltip("temp_min_c:Q", format=".2f"),
+                    alt.Tooltip("temp_max_c:Q", format=".2f"),
                 ],
             )
         )
@@ -131,7 +135,7 @@ else:
 
     st.altair_chart(chart, use_container_width=True)
     st.write(
-        "Days with missing recordings are shown in red. We fill in the missing values based on an average between the previous and next recording for that station."
+        "Days with missing recordings are shown in red. We fill in the missing values based on an average between the previous and next recording for that station. We average recordings for stations in the same city - this is the case for both Portland and Washington DC."
     )
     st.write(
         "#### Missing Temperatures Recordings",
@@ -162,6 +166,7 @@ line = (
             "weighted_mean_temp:Q", title="Weighted Average Temperatures (Celcius)"
         ),
         tooltip=[
+            alt.Tooltip("location_date:T"),
             alt.Tooltip("weighted_mean_temp:Q", format=".2f"),
             alt.Tooltip("weighted_min_temp:Q", format=".2f"),
             alt.Tooltip("weighted_max_temp:Q", format=".2f"),
@@ -176,6 +181,7 @@ band = (
         y="weighted_min_temp:Q",
         y2="weighted_max_temp:Q",
         tooltip=[
+            alt.Tooltip("location_date:T"),
             alt.Tooltip("weighted_mean_temp:Q", format=".2f"),
             alt.Tooltip("weighted_min_temp:Q", format=".2f"),
             alt.Tooltip("weighted_max_temp:Q", format=".2f"),
@@ -429,7 +435,7 @@ lb_agg.title = "Population Weighted Seasonal Temperatures"
 st.altair_chart(lb_agg, use_container_width=True)
 
 st.write(
-    "Overlay your cursor to get specific temperature information for a given season/year."
+    "Overlay your cursor to get specific temperature information for a given season/year. Seasons are calculated as Winter (Dec-Feb), Spring (March-May), Summer (June-Aug), and Autumn (Sept-Nov)."
 )
 
 st.button("Re-run")
