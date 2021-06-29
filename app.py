@@ -152,7 +152,7 @@ else:
     )
 
 st.write("## Population weighted temperatures recorded")
-daily_weighted_data = get_daily_weighted_temperatures()
+daily_weighted_data = get_daily_weighted_temperatures().copy()
 mask = (daily_weighted_data.location_date >= from_date_ts) & (
     daily_weighted_data.location_date <= to_date_ts
 )
@@ -225,11 +225,8 @@ st.altair_chart(pop_chart, use_container_width=True)
 st.write(
     "## Plotting Monthly Population Weighted Mean, Min and Max Temperatures",
 )
-mean_df = (
-    daily_weighted_data.groupby(pd.Grouper(key="location_date", freq="1M"))
-    .mean()
-    .reset_index()
-)
+data = daily_weighted_data.copy()
+mean_df = data.groupby(pd.Grouper(key="location_date", freq="1M")).mean().reset_index()
 mean_df["date_string"] = (
     mean_df.location_date.dt.month_name()
     + " "
@@ -255,9 +252,9 @@ else:
             ),
             tooltip=[
                 "date_string",
-                "weighted_mean_temp:N",
-                "weighted_min_temp:N",
-                "weighted_max_temp:N",
+                alt.Tooltip("weighted_mean_temp:Q", format=".2f"),
+                alt.Tooltip("weighted_min_temp:Q", format=".2f"),
+                alt.Tooltip("weighted_max_temp:Q", format=".2f"),
             ],
         )
     )
@@ -270,9 +267,9 @@ else:
             y2="weighted_max_temp:Q",
             tooltip=[
                 "date_string",
-                "weighted_mean_temp:N",
-                "weighted_min_temp:N",
-                "weighted_max_temp:N",
+                alt.Tooltip("weighted_mean_temp:Q", format=".2f"),
+                alt.Tooltip("weighted_min_temp:Q", format=".2f"),
+                alt.Tooltip("weighted_max_temp:Q", format=".2f"),
             ],
         )
     )
@@ -301,9 +298,7 @@ seasons = st.multiselect(
 if not seasons:
     seasons = ["Winter", "Spring", "Summer", "Autumn"]
 
-daily_weighted_data[
-    "season_name"
-] = daily_weighted_data.location_date.dt.month_name().map(
+data["season_name"] = data.location_date.dt.month_name().map(
     {
         "December": "Winter",
         "January": "Winter",
@@ -319,27 +314,18 @@ daily_weighted_data[
         "November": "Autumn",
     }
 )
-daily_weighted_data["year"] = daily_weighted_data["location_date"].apply(
-    lambda x: x.year
-)
-daily_weighted_data["month"] = daily_weighted_data["location_date"].apply(
-    lambda x: x.month
-)
-daily_weighted_data["month"] = np.where(
-    daily_weighted_data["month"] == 12, 0, daily_weighted_data["month"]
-)
-daily_weighted_data["season"] = daily_weighted_data["month"] // 3
-daily_weighted_data["name_year_cumulative"] = (
-    daily_weighted_data["year"] - daily_weighted_data["year"].min()
-)
-daily_weighted_data["cumulative_season"] = np.where(
-    daily_weighted_data["month"] == 0,
-    daily_weighted_data["season"]
-    + (daily_weighted_data["name_year_cumulative"] + 1) * 4,
-    daily_weighted_data["season"] + daily_weighted_data["name_year_cumulative"] * 4,
+data["year"] = data["location_date"].apply(lambda x: x.year)
+data["month"] = data["location_date"].apply(lambda x: x.month)
+data["month"] = np.where(data["month"] == 12, 0, data["month"])
+data["season"] = data["month"] // 3
+data["name_year_cumulative"] = data["year"] - data["year"].min()
+data["cumulative_season"] = np.where(
+    data["month"] == 0,
+    data["season"] + (data["name_year_cumulative"] + 1) * 4,
+    data["season"] + data["name_year_cumulative"] * 4,
 )
 season_weighted_data = (
-    daily_weighted_data.groupby("cumulative_season")
+    data.groupby("cumulative_season")
     .agg(
         {
             "weighted_mean_temp": "mean",
