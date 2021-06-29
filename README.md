@@ -4,7 +4,7 @@ This is a short analysis of temperature data recorded from 2015-2020.
 
 What prompted this analysis was a tweet:
 
-![prompt][prompt.jpg]
+![prompt](prompt.jpg)
 
 All the code can be found in the jupyter notebook as well as a streamlit app running on heroku here: https://recorded-temperatures.herokuapp.com/ .
 
