@@ -135,7 +135,7 @@ else:
 
     st.altair_chart(chart, use_container_width=True)
     st.write(
-        "Days with missing recordings are shown in red. We fill in the missing values based on an average between the previous and next recording for that station. We average recordings for stations in the same city - this is the case for both Portland and Washington DC."
+        "Days with missing recordings are shown in red. We fill in the missing values based on an average between the previous and next recording for that station. We average recordings for stations in the same city - this is the case for Washington DC."
     )
     st.write(
         "#### Missing Temperatures Recordings",
