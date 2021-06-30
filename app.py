@@ -216,7 +216,7 @@ pop_chart = (
         alt.Y("Lat:Q", scale=alt.Scale(zero=False)),
         color=alt.Color("name:N", legend=None),
         tooltip="name:N",
-        size="population",
+        size="total_pop:Q",
     )
 )
 st.altair_chart(pop_chart, use_container_width=True)
