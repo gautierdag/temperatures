@@ -203,7 +203,7 @@ chart = lb + ch
 chart.title = "Average Temperatures Recorded Weighted by Population"
 st.altair_chart(chart, use_container_width=True)
 st.write(
-    "Here we weight daily temperatures (min/max/mean) recorded by the population of the cities in which they are recorded, to obtain a single timeseries."
+    "Here we weight daily temperatures (min/max/mean) recorded by the population of the cities in which they are recorded and neighboring cities, to obtain a single timeseries. Each city in the population csv is matched with its closest weather station, and its population is added to the weight of that station."
 )
 
 st.write("### Population data")

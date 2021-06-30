@@ -13,3 +13,5 @@ For imputing missing data/days we use an average between the last recorded tempe
 Popualtion data for a couple of cities was found missing from the population dataframe and we complete this data from wikipedia.
 
 Observations from weather stations are typically unique to cities, except for Washington which has two stations. We average the temperature recordings of these two stations to obtain a single series per city.
+
+We use the population data to agreggate population to the stations which are closest to it, and thus weight this analysis by for about 87 mil people (note this is the sum total of the population given in the population csv).
